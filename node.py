@@ -3,15 +3,16 @@ Represents nodes in the problem graph or network.
 Locatin coordinates can be passed while creating the object or they
 will be assigned random values.
 '''
-from globals import *
-
+import random
+import math
+import globals
 
 class Node:
     # Good old constructor
     def __init__(self, x=None, y=None):
         if x == None and y == None:
-            self.x = random.randint(0, xMax)
-            self.y = random.randint(0, yMax)
+            self.x = random.randint(0, globals.xMax)
+            self.y = random.randint(0, globals.yMax)
         else:
             self.x = x
             self.y = y

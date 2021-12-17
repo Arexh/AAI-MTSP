@@ -2,7 +2,10 @@
 Represents the chromosomes in GA's population.
 The object is collection of individual routes taken by trucks.
 '''
-from routemanager import *
+from routemanager import RouteManager
+from node import Node
+import globals
+import random
 
 
 class Route:
@@ -13,9 +16,9 @@ class Route:
         # 1D array having routes in a series - used during crossover operation
         self.base = []
         # 1D array having route lengths
-        self.routeLengths = route_lengths()
+        self.routeLengths = globals.route_lengths()
 
-        for i in range(numTrucks):
+        for i in range(globals.numTrucks):
             self.route.append([])
 
         # fitness value and total distance of all routes
@@ -37,7 +40,7 @@ class Route:
             self.base[dindex-1] = RouteManager.getNode(dindex)
         random.shuffle(self.base)
 
-        for i in range(numTrucks):
+        for i in range(globals.numTrucks):
             self.route[i].append(RouteManager.getNode(0))  # add same first node for each route
             for j in range(self.routeLengths[i]-1):
                 self.route[i].append(self.base[k])  # add shuffled values for rest
@@ -66,7 +69,7 @@ class Route:
         if self.distance == 0:
             routeDistance = 0
 
-            for i in range(numTrucks):
+            for i in range(globals.numTrucks):
                 for j in range(self.routeLengths[i]):
                     fromNode = self.getNode(i, j)
 
@@ -92,7 +95,7 @@ class Route:
     def toString(self):
         geneString = '|'
         print(self.routeLengths)
-        for i in range(numTrucks):
+        for i in range(globals.numTrucks):
             for j in range(self.routeLengths[i]):
                 geneString += self.getNode(i, j).toString() + '|'
             geneString += '\n'

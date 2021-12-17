@@ -2,8 +2,6 @@
 Holds all the node objects and is used for
 creation of chromosomes by jumbling their sequence
 '''
-from node import *
-
 
 class RouteManager:
     destinationNodes = []

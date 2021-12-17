@@ -1,21 +1,27 @@
 import random
-import math
+
 '''
 Contains all global variables specific to simulation
 '''
-# Defines range for coordinates when nodes are randomly scattered
-xMax = 1000
-yMax = 1000
-seedValue = 1
-numNodes = 200
-numGenerations = 70
-# size of population
-populationSize = 100
-mutationRate = 0.02
-tournamentSize = 10
-elitism = True
-# number of trucks
-numTrucks = 10
+
+
+def init():
+    global xMax, yMax, seedValue, numNodes,\
+        numGenerations, populationSize, mutationRate, tournamentSize,\
+        elitism, numTrucks
+    # Defines range for coordinates when nodes are randomly scattered
+    xMax = 1000
+    yMax = 1000
+    seedValue = 1
+    numNodes = 200
+    numGenerations = 70
+    # size of population
+    populationSize = 100
+    mutationRate = 0.02
+    tournamentSize = 10
+    elitism = True
+    # number of trucks
+    numTrucks = 10
 
 
 def random_range(n, total):
@@ -40,3 +46,19 @@ def route_lengths():
         else:
             a = random_range(numTrucks, upper)
     return a
+
+
+def is_not_blank(s):
+    return bool(s and not s.isspace())
+
+
+def read_dataset(p):
+    global numNodes
+    with open(p) as f:
+        node = []
+        numNodes = int(f.readline())
+        for line in f.read().splitlines():
+            if is_not_blank(line):
+                temp_list = line.split(' ')
+                node.append([int(temp_list[1]), int(temp_list[2])])
+        return node
