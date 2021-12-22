@@ -5,7 +5,6 @@ will be assigned random values.
 '''
 import random
 import math
-import globals
 
 class Node:
     # Good old constructor

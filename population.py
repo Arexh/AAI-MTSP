@@ -1,41 +1,33 @@
 '''
 Collection of routes (chrmosomes)
 '''
-from route import Route
+from individual import Individual
 
 class Population:
-    routes = []
-    # Good old contructor
 
-    def __init__(self, populationSize, initialise):
-        self.populationSize = populationSize
-        if initialise:
-            for i in range(populationSize):
-                newRoute = Route()  # Create empty route
-                newRoute.generateIndividual()  # Add route sequences
-                self.routes.append(newRoute)  # Add route to the population
+    def __init__(self, nodes, salesman_num, population_size):
+        self.population_size = population_size
+        self.individuals = []
+        self.nodes = nodes
+        self.salesman_num = salesman_num
 
-    # Saves the route passed as argument at index
-    def saveRoute(self, index, route):
-        self.routes[index] = route
+    def random_init(self):
+        for i in range(self.population_size):
+            individual = Individual(self.nodes, self.salesman_num)
+            individual.random_init()
+            self.individuals.append(individual)
 
-    # Returns route at index
-    def getRoute(self, index):
-        return self.routes[index]
+    def evaluate(self):
+        calculation_times = 0
+        for individual in self.individuals:
+            if individual.fitness == -1:
+                calculation_times += individual.evaluate()
+        return calculation_times
 
-    # Returns route with maximum fitness value
-    def getFittest(self):
-        fittest = self.routes[0]
+    def find_fittest(self):
+        self.evaluate()
+        return max(self.individuals, key=lambda x : x.fitness)
 
-        for i in range(1, self.populationSize):
-            if fittest.getFitness() <= self.getRoute(i).getFitness():
-                fittest = self.getRoute(i)
-
-        return fittest
-
-    def populationSize(self):
-        return int(self.populationSize)
-
-    # Equate current population values to that of pop
-    def equals(self, pop):
-        self.routes = pop.routes
+    def sorted_individuals(self):
+        self.evaluate()
+        return sorted(self.individuals, key=lambda x : x.fitness, reverse=True)
