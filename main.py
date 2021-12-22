@@ -9,6 +9,7 @@ import scipy.stats
 import utils
 from nga2 import NGA2
 from ga import GA as baseline
+import time
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 1
@@ -19,13 +20,14 @@ SEED_VALUE = 1
 ELITE_SIZE = 1
 TIMES = 30
 
+start_time = time.time()
+
 random.seed(SEED_VALUE)
 
-# ALGORITHMS = [baseline, NGA2]
 ALGORITHMS = [baseline, NGA2]
 DATASETS = ["mtsp51", "mtsp100", "mtsp150", "pr76", "pr152", "pr226"]
-# DATASETS = ["pr226"]
-RESULT_PATH = "./results/"
+# DATASETS = ["mtsp51"]
+RESULT_PATH = "./results!/"
 
 result_log = {}
 
@@ -94,10 +96,14 @@ for dataset in DATASETS:
         
     # plot every generation's fitness
     fig, ax = plt.subplots()
-    for every_fitness in baseline_every_gen:
-        plt.plot(every_fitness, color="dodgerblue", label="Baseline")
-    for every_fitness in ours_every_gen:
-        plt.plot(every_fitness, color="seagreen", label="Ours")
+
+    baseline_every_gen = np.array(baseline_every_gen)
+    ours_every_gen = np.array(ours_every_gen)
+
+    plt.fill_between(range(baseline_every_gen.shape[1]), np.max(baseline_every_gen, axis=0), np.min(baseline_every_gen, axis=0), interpolate=True, color='#a5d2ff')
+    plt.plot(np.mean(baseline_every_gen, axis=0), color="dodgerblue", label="Baseline")
+    plt.fill_between(range(ours_every_gen.shape[1]), np.max(ours_every_gen, axis=0), np.min(ours_every_gen, axis=0), interpolate=True, color='#abd0bb')
+    plt.plot(np.mean(ours_every_gen, axis=0), color="seagreen", label="Ours")
 
     ranksum_test = scipy.stats.ranksums(baseline_best, ours_best)
 
@@ -127,4 +133,4 @@ for dataset in DATASETS:
 with open(RESULT_PATH + 'result_log.json', 'w') as f:
     json.dump(result_log, f, indent=4)
 
-print(result_log)
+print("Finish time:", time.time() - start_time)

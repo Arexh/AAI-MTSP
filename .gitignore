@@ -130,3 +130,5 @@ dmypy.json
 
 # experiment plot
 /plot.png
+
+/result*
