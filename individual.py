@@ -59,7 +59,7 @@ class Individual:
         return self.node_num + self.salesman_num * 2 - 2
 
     def __str__(self) -> str:
-        return str(self.node_sequence) + "\n" + str(self.salesman_length)
+        return "\nNode sequence: " + str(self.node_sequence) + "\n" + "Each individual: " + str(self.salesman_length)
 
 # i = Individual([], 10)
 # 1531.2219430620278

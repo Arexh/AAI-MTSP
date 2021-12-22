@@ -1,67 +1,130 @@
-from ga import GA
-from routemanager import RouteManager
 from population import Population
-import random
 import matplotlib.pyplot as plt
 import progressbar
 import numpy as np
+import random
+import os
+import json
+import scipy.stats
 import utils
 from nga2 import NGA2
-from ga import GA
+from ga import GA as baseline
 
-numGenerations = 100
-# size of population
-populationSize = 100
-mutationRate = 1
-tournamentSize = 10
-elitism = True
-# number of trucks
-numTrucks = 5
-seedValue = 1
-elite_size = 1
+POPULATION_SIZE = 100
+MUTATION_RATE = 1
+TOURNAMENT_SIZE = 10
+ELITISM = True
+SALESMAN_NUM = 5
+SEED_VALUE = 1
+ELITE_SIZE = 1
+TIMES = 30
 
-DATA_SET_PATH = "./data/pr226.txt"
+random.seed(SEED_VALUE)
 
-widgets = ['Progress: ', progressbar.Percentage(), ' ', progressbar.Bar('#'), ' ', progressbar.Timer(),
-           ' ', progressbar.ETA()]
-pbar = progressbar.ProgressBar(widgets=widgets)
+# ALGORITHMS = [baseline, NGA2]
+ALGORITHMS = [baseline, NGA2]
+DATASETS = ["mtsp51", "mtsp100", "mtsp150", "pr76", "pr152", "pr226"]
+# DATASETS = ["pr226"]
+RESULT_PATH = "./results/"
 
-nodes = utils.read_dataset(DATA_SET_PATH)
+result_log = {}
 
-# random.seed(seedValue)
-yaxis = []  # Fittest value (distance)
-xaxis = []  # Generation count
+if not os.path.exists(RESULT_PATH):
+    os.makedirs(RESULT_PATH)
 
-pop = Population(nodes, numTrucks, populationSize)
-pop.random_init()
-globalRoute = pop.find_fittest()
-print('Initial minimum distance: ' + str(-globalRoute.fitness))
-ga = NGA2(nodes=nodes,
-          population_size=populationSize,
-          mutation_rate=mutationRate,
-          tournament_size=tournamentSize,
-          elitism=elitism,
-          salesman_num=numTrucks,
-          elite_size=elite_size,
-          max_distance_calculate=20000)
+for dataset in DATASETS:
+    index = 0
+    baseline_every_gen = []
+    ours_every_gen = []
+    baseline_best = []
+    ours_best = []
+    current_dataset_log = {}
+    for algorithm in ALGORITHMS:
+        current_algorithm_log = {
+            "BestDistance": [],
+            "GenerationDistance": [],
+            "AverageDistance": []
+        }
+        for t in range(TIMES):
+            widgets = ['Data: ', dataset, ', Alg: ', algorithm.get_name(), ', Progress: ', progressbar.Percentage(), ', ', progressbar.Bar('#'), ', ', progressbar.Timer(), ', ', progressbar.ETA(), ', ', progressbar.DynamicMessage("current_best_result")]
+            nodes = utils.read_dataset("./data/" + dataset + ".txt")
+            numGenerations = int(20000 * len(nodes) / utils.one_calculate_times(SALESMAN_NUM, len(nodes)) / (POPULATION_SIZE - 1))
+            pop = Population(nodes, SALESMAN_NUM, POPULATION_SIZE)
+            pop.random_init()
+            globalRoute = pop.find_fittest()
 
-# Start evolving
-for i in pbar(range(numGenerations)):
-    pop = ga.evolve(pop)
-    localRoute = pop.find_fittest()
-    print(localRoute.fitness)
-    if globalRoute.fitness < localRoute.fitness:
-        globalRoute = localRoute
-    yaxis.append(-localRoute.fitness)
-    xaxis.append(i)
+            ga = algorithm(nodes=nodes,
+                            population_size=POPULATION_SIZE,
+                            mutation_rate=MUTATION_RATE,
+                            tournament_size=TOURNAMENT_SIZE,
+                            elitism=ELITISM,
+                            salesman_num=SALESMAN_NUM,
+                            elite_size=ELITE_SIZE,
+                            max_distance_calculate=20000)
 
-print('Global minimum distance: ' + str(-globalRoute.fitness))
-print('Final Route:', globalRoute)
+            pbar = progressbar.ProgressBar(widgets=widgets)
+            fitnesses = []
+            # Start evolving
+            for i in pbar(range(numGenerations)):
+                pop = ga.evolve(pop)
+                localRoute = pop.find_fittest()
+                pbar.dynamic_messages.current_best_result = -localRoute.fitness
+                if globalRoute.fitness < localRoute.fitness:
+                    globalRoute = localRoute
+                fitnesses.append(-localRoute.fitness)
 
-fig = plt.figure()
+            if index == 0:
+                baseline_every_gen.append(fitnesses)
+                baseline_best.append(-globalRoute.fitness)
+            else:
+                ours_every_gen.append(fitnesses)
+                ours_best.append(-globalRoute.fitness)
 
-plt.plot(xaxis, yaxis, 'r-')
-plt.savefig("plot.png", dpi=400)
+            assert len(np.unique(globalRoute.node_sequence, axis=0)) == len(nodes)
+            assert sorted(globalRoute.node_sequence) == sorted(nodes)
+            current_algorithm_log['AverageDistance'].append(sum(fitnesses) / len(fitnesses))
+            current_algorithm_log['GenerationDistance'].append(fitnesses)
+            current_algorithm_log['BestDistance'].append(-globalRoute.fitness)
+        
+        if index == 0:
+            current_dataset_log["Baseline"] = current_algorithm_log
+        else:
+            current_dataset_log["Ours"] = current_algorithm_log
+        index += 1
+        
+    # plot every generation's fitness
+    fig, ax = plt.subplots()
+    for every_fitness in baseline_every_gen:
+        plt.plot(every_fitness, color="dodgerblue", label="Baseline")
+    for every_fitness in ours_every_gen:
+        plt.plot(every_fitness, color="seagreen", label="Ours")
 
-assert len(np.unique(globalRoute.node_sequence, axis=0)) == len(nodes)
-assert sorted(globalRoute.node_sequence) == sorted(nodes)
+    ranksum_test = scipy.stats.ranksums(baseline_best, ours_best)
+
+    current_dataset_log['Statistic'] = ranksum_test[0]
+    current_dataset_log['PValue'] = ranksum_test[1]
+
+    ax.legend(loc='upper right', frameon=False)
+    plt.title(dataset + " dataset (" + str(TIMES) + " runs)")
+    plt.xlabel("Generation")
+    plt.ylabel("Distance")
+    plt.savefig(RESULT_PATH + dataset + "(all).eps", format='eps')
+    
+    # plot every best fitness
+    fig, ax = plt.subplots()
+    plt.plot(baseline_best, color="dodgerblue", label="Baseline")
+    plt.plot(ours_best, color="seagreen", label="Ours")
+    plt.plot([sum(baseline_best) / len(baseline_best)] * len(baseline_best), label='Baseline Average', linestyle='--')
+    plt.plot([sum(ours_best) / len(ours_best)] * len(ours_best), label='Ours Average', linestyle='--')
+    ax.legend(frameon=False)
+    plt.title(dataset + " dataset (" + str(TIMES) + " runs)")
+    plt.xlabel("Run")
+    plt.ylabel("Best Distance")
+    plt.savefig(RESULT_PATH + dataset + "(best).eps", format='eps')
+
+    result_log[dataset] = current_dataset_log
+
+with open(RESULT_PATH + 'result_log.json', 'w') as f:
+    json.dump(result_log, f, indent=4)
+
+print(result_log)

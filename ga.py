@@ -57,3 +57,6 @@ class GA(GABase):
 
     def select(self):
         pass
+
+    def get_name():
+        return "Baseline"
