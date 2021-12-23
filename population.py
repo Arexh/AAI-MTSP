@@ -25,9 +25,11 @@ class Population:
         return calculation_times
 
     def find_fittest(self):
+        # find the fittest one, based on their fitness
         self.evaluate()
         return max(self.individuals, key=lambda x : x.fitness)
 
     def sorted_individuals(self):
+        # sort according to their fitness
         self.evaluate()
         return sorted(self.individuals, key=lambda x : x.fitness, reverse=True)

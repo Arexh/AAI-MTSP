@@ -26,7 +26,6 @@ random.seed(SEED_VALUE)
 
 ALGORITHMS = [baseline, NGA2]
 DATASETS = ["mtsp51", "mtsp100", "mtsp150", "pr76", "pr152", "pr226"]
-# DATASETS = ["mtsp51"]
 RESULT_PATH = "./results/"
 
 result_log = {}
@@ -66,15 +65,19 @@ for dataset in DATASETS:
 
             pbar = progressbar.ProgressBar(widgets=widgets)
             fitnesses = []
-            # Start evolving
             for i in pbar(range(numGenerations)):
+                # evolve the population
                 pop = ga.evolve(pop)
+                # get the fittest one in the population
                 localRoute = pop.find_fittest()
+                # get the distance
                 pbar.dynamic_messages.current_best_result = -localRoute.fitness
+                # record the best one
                 if globalRoute.fitness < localRoute.fitness:
                     globalRoute = localRoute
                 fitnesses.append(-localRoute.fitness)
 
+            # record data
             if index == 0:
                 baseline_every_gen.append(fitnesses)
                 baseline_best.append(-globalRoute.fitness)
@@ -82,12 +85,15 @@ for dataset in DATASETS:
                 ours_every_gen.append(fitnesses)
                 ours_best.append(-globalRoute.fitness)
 
+            # verify leagal
             assert len(np.unique(globalRoute.node_sequence, axis=0)) == len(nodes)
             assert sorted(globalRoute.node_sequence) == sorted(nodes)
+            # record data
             current_algorithm_log['AverageDistance'].append(sum(fitnesses) / len(fitnesses))
             current_algorithm_log['GenerationDistance'].append(fitnesses)
             current_algorithm_log['BestDistance'].append(-globalRoute.fitness)
         
+        # record data
         if index == 0:
             current_dataset_log["Baseline"] = current_algorithm_log
         else:
@@ -97,19 +103,24 @@ for dataset in DATASETS:
     # plot every generation's fitness
     fig, ax = plt.subplots()
 
+    # turn into numpy array
     baseline_every_gen = np.array(baseline_every_gen)
     ours_every_gen = np.array(ours_every_gen)
 
+    # plot the graph, two line which reprsents baseline and our method
     plt.fill_between(range(baseline_every_gen.shape[1]), np.max(baseline_every_gen, axis=0), np.min(baseline_every_gen, axis=0), interpolate=True, color='#a5d2ff')
     plt.plot(np.mean(baseline_every_gen, axis=0), color="dodgerblue", label="Baseline")
     plt.fill_between(range(ours_every_gen.shape[1]), np.max(ours_every_gen, axis=0), np.min(ours_every_gen, axis=0), interpolate=True, color='#abd0bb')
     plt.plot(np.mean(ours_every_gen, axis=0), color="seagreen", label="Ours")
 
+    # calculate ranksum
     ranksum_test = scipy.stats.ranksums(baseline_best, ours_best)
 
+    # record the ranksum statistic and pvalue
     current_dataset_log['Statistic'] = ranksum_test[0]
     current_dataset_log['PValue'] = ranksum_test[1]
 
+    # set the labels and tilet, save plot into eps file
     ax.legend(loc='upper right', frameon=False)
     plt.title(dataset + " dataset (" + str(TIMES) + " runs)")
     plt.xlabel("Generation")
@@ -127,10 +138,12 @@ for dataset in DATASETS:
     plt.xlabel("Run")
     plt.ylabel("Best Distance")
     plt.savefig(RESULT_PATH + dataset + "(best).eps", format='eps')
-
+    # store the dataset log
     result_log[dataset] = current_dataset_log
 
+# save log to json file
 with open(RESULT_PATH + 'result_log.json', 'w') as f:
     json.dump(result_log, f, indent=4)
 
+# print the used time
 print("Finish time:", time.time() - start_time)

@@ -28,7 +28,7 @@ class Individual:
         self.node_sequence = self.nodes[1:]
         random.shuffle(self.node_sequence)
         self.node_sequence = [self.nodes[0]] + self.node_sequence
-
+        # random generate the leagal length for each salesmman
         self.init_length()
 
         assert self.node_sequence[0] == self.nodes[0]
@@ -43,6 +43,7 @@ class Individual:
         return sum(self.salesman_length[:salesman_index]) + node_index
 
     def evaluate(self):
+        # evaluate the distance
         if self.fitness != -1:
             return 0
         else:

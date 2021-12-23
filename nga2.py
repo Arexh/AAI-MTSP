@@ -42,8 +42,8 @@ class NGA2(GABase):
     # Function to implement crossover operation
     def crossover(self, parent_one: Individual, parent_two: Individual):
         return one_point_crossover(parent_one, parent_two)
-    # Mutation opeeration
 
+    # Mutation opeeration
     def mutate(self, individual: Individual):
         if random.random() < 0.9:
             one_slide_reverse_mutate(individual)

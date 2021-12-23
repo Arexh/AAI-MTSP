@@ -1,1 +1,4 @@
-progressbar2 3.55.0
+matplotlib==2.1.1
+numpy==1.19.5
+progressbar33==2.4
+scipy==1.5.4
