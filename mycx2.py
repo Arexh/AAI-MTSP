@@ -14,33 +14,33 @@ TEST_ANS = [
 ]
 
 
-def cx2_crossover(parrent_one: list, parrent_two: list) -> list:
-    length = len(parrent_one)
-    assert len(parrent_one) == len(parrent_two)
+def cx2_crossover(parent_one: list, parent_two: list) -> list:
+    length = len(parent_one)
+    assert len(parent_one) == len(parent_two)
     child_one = [None] * length
     child_two = [None] * length
     value_index = 0
 
-    def get_next(parrent_one, parrent_two, value_index):
-        return parrent_one.index(parrent_two[value_index])
+    def get_next(parent_one, parent_two, value_index):
+        return parent_one.index(parent_two[value_index])
     for index in range(length):
-        if parrent_two[value_index] in child_one:
+        if parent_two[value_index] in child_one:
             if sorted(child_one[:index]) == sorted(child_one[:index]):
                 for index_two in range(length):
-                    if parrent_two[index_two] not in child_one:
+                    if parent_two[index_two] not in child_one:
                         value_index = index_two
                         break
             else:
-                while parrent_two[value_index] in child_one:
-                    value_index = get_next(parrent_one, parrent_two, value_index)
+                while parent_two[value_index] in child_one:
+                    value_index = get_next(parent_one, parent_two, value_index)
         # assign child one
-        child_one[index] = parrent_two[value_index]
+        child_one[index] = parent_two[value_index]
         # find next value index for child two
-        value_index = get_next(parrent_one, parrent_two, value_index)
+        value_index = get_next(parent_one, parent_two, value_index)
         # assign child two
-        child_two[index] = parrent_two[value_index]
+        child_two[index] = parent_two[value_index]
         # update value index
-        value_index = get_next(parrent_one, parrent_two, value_index)
+        value_index = get_next(parent_one, parent_two, value_index)
 
     return child_one, child_two
 

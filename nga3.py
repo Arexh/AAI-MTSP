@@ -45,8 +45,8 @@ class NGA3(GABase):
         return new_population
 
     # Function to implement crossover operation
-    def crossover(self, parrent_one : Individual, parrent_two : Individual):
-        return my_cx_crossover(parrent_one, parrent_two)
+    def crossover(self, parent_one : Individual, parent_two : Individual):
+        return my_cx_crossover(parent_one, parent_two)
 
     # Mutation opeeration
     def mutate(self, individual : Individual):

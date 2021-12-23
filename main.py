@@ -27,7 +27,7 @@ random.seed(SEED_VALUE)
 ALGORITHMS = [baseline, NGA2]
 DATASETS = ["mtsp51", "mtsp100", "mtsp150", "pr76", "pr152", "pr226"]
 # DATASETS = ["mtsp51"]
-RESULT_PATH = "./results!/"
+RESULT_PATH = "./results/"
 
 result_log = {}
 

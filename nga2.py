@@ -2,15 +2,12 @@
 The main helper class for Genetic Algorithm to perform
 crossover, mutation on populations to evolve them
 '''
-from numpy.core.numeric import indices
 from gabase import GABase
 from population import Population
 from individual import Individual
 from ops.crossover_op import *
 from ops.mutate_op import *
 import random
-
-from utils import random_length
 
 
 class NGA2(GABase):
@@ -43,8 +40,8 @@ class NGA2(GABase):
         return new_population
 
     # Function to implement crossover operation
-    def crossover(self, parrent_one: Individual, parrent_two: Individual):
-        return one_point_crossover(parrent_one, parrent_two)
+    def crossover(self, parent_one: Individual, parent_two: Individual):
+        return one_point_crossover(parent_one, parent_two)
     # Mutation opeeration
 
     def mutate(self, individual: Individual):

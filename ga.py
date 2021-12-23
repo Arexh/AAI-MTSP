@@ -39,8 +39,8 @@ class GA(GABase):
         return new_population
 
     # Function to implement crossover operation
-    def crossover(self, parrent_one : Individual, parrent_two : Individual):
-        return two_points_cross_baseline(parrent_one, parrent_two)
+    def crossover(self, parent_one : Individual, parent_two : Individual):
+        return two_points_cross_baseline(parent_one, parent_two)
 
     # Mutation opeeration
     def mutate(self, individual : Individual):
